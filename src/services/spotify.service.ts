@@ -38,7 +38,7 @@ export class SpotifyService implements SongService {
       artist: track.artists[0].name,
     };
   }
-  getStream(song: Song): Promise<unknown> {
+  getStream(song: Song) {
     return this.YTDLCoreService.getStream(song);
   }
 }

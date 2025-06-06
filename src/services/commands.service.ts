@@ -1,49 +1,76 @@
+import { SongService } from '../interfaces/song.service';
 import { Bot } from '../types/bot';
+import { v6 } from 'uuid';
+import { SpotifyService } from './spotify.service';
+import { YoutubeService } from './youtube.service';
+import { createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
 
 export class CommandsService {
-  constructor() {}
-  public static async piPlay(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  private stringAfter: string;
+  private sendMessage: string;
+  private serverError: boolean = true;
+  private song: SongService;
+  constructor(
+    stringAfter: string,
+    private readonly yoututubeService?: YoutubeService,
+    private readonly spotifyService?: SpotifyService,
+  ) {
+    this.stringAfter = stringAfter;
   }
-  public static async piStop(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+
+  async piPlay(bot: Bot): Promise<Bot> {
+    try {
+      if (this.stringAfter.includes('spotify')) {
+        this.song = <SongService>this.spotifyService;
+      } else {
+        this.song = <SongService>this.yoututubeService;
+      }
+      const songSearch = await this.song.search(this.stringAfter);
+      bot.queue.set(v6(), songSearch);
+      const stream = await this.song.getStream(songSearch);
+      const player = createAudioPlayer({
+        behaviors: {
+          noSubscriber: NoSubscriberBehavior.Pause,
+        },
+      });
+      player.play(stream);
+      bot.connection?.playOpusPacket(stream);
+
+      await this.songService.play(this.stringAfter, bot);
+      return bot;
+    } catch (error) {
+      console.log(error);
+      return bot;
+    }
   }
-  public static piQueue(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piStop(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piPause(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piQueue(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piResume(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piPause(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piIDF(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piResume(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piMashAllah(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piIDF(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piLeo(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piMashAllah(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piHelp(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piLeo(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piVideoAI(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piHelp(bot: Bot): Promise<Bot> {
+    return bot;
   }
-  public static async piVideoAIImages(string: string, bot: Bot) {
-    console.log(string);
-    console.log(bot);
+  async piVideoAI(bot: Bot): Promise<Bot> {
+    return bot;
+  }
+  async piVideoAIImages(bot: Bot): Promise<Bot> {
+    return bot;
   }
 }

@@ -21,7 +21,7 @@ export class YoutubeService implements SongService {
     };
   }
 
-  async getStream(song: Song): Promise<unknown> {
+  getStream(song: Song) {
     return this.YTDLCoreService.getStream(song);
   }
 }
