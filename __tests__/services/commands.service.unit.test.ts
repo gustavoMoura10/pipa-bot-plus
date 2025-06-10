@@ -3,12 +3,17 @@ import { Channel, Client, VoiceChannel } from 'discord.js';
 import { Bot } from '../../src/types/bot';
 import findCommand from '../../src/utils/findCommand';
 import { ClientDiscord } from '../../src/config/client.discord';
+import { DiscordGatewayAdapterCreator, joinVoiceChannel } from '@discordjs/voice';
 let bot: Bot;
+let clientDiscord: ClientDiscord;
 let client: Client;
 beforeAll(async () => {
-  client = await new ClientDiscord().getClient();
+  clientDiscord = new ClientDiscord();
+  client = await clientDiscord.getClient();
 });
-afterAll(async() => {
+afterAll(async () => {
+  jest.setTimeout(20000);
+
   await client.destroy();
 });
 describe('CommandsService class test', () => {
@@ -22,14 +27,21 @@ describe('CommandsService class test', () => {
       queue: new Map(),
       channel: channel,
       voiceChannel: channel,
-      guild:guild,
+      guild: guild,
+      connection:null
     };
+    bot.connection = joinVoiceChannel({
+      channelId: `${bot?.voiceChannel?.id}` || '',
+      guildId: `${bot?.guild?.id}` || '',
+      adapterCreator:bot?.guild?.voiceAdapterCreator as DiscordGatewayAdapterCreator,
+    });
     const resultCommand = findCommand('!pi-play America Simon & Garfunkel');
     expect(resultCommand?.execute.name).toBe('bound piPlay');
     expect(resultCommand?.type).toBe('voice');
     if (typeof resultCommand?.execute === 'function') {
       bot = <Bot>await resultCommand?.execute(bot);
       expect(bot.queue.size).toBeGreaterThan(0);
+      bot.connection?.disconnect();
     }
   });
 });

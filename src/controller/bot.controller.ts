@@ -25,8 +25,9 @@ export class BotController {
         channel: message.channel,
         voiceChannel: message.member?.voice.channel,
         guild: message.guild,
+        connection: null,
       };
-
+      
       const resultCommand = findCommand(message.content);
       if (resultCommand?.type === 'voice') {
         if (!this.bot.voiceChannel && this.bot.channel instanceof TextChannel) {

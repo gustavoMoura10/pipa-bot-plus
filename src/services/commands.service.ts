@@ -3,22 +3,24 @@ import { Bot } from '../types/bot';
 import { v6 } from 'uuid';
 import { SpotifyService } from './spotify.service';
 import { YoutubeService } from './youtube.service';
-import { createAudioPlayer, createAudioResource, NoSubscriberBehavior } from '@discordjs/voice';
+import {
+  createAudioPlayer,
+  createAudioResource,
+  NoSubscriberBehavior,
+  StreamType,
+} from '@discordjs/voice';
 import { YTDLCoreService } from './ytdl.core.service';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 
 export class CommandsService {
   private stringAfter: string;
-  private sendMessage?: string;
   private serverError: boolean = true;
   private song?: SongService;
   private yoututubeService?: YoutubeService;
   private spotifyService?: SpotifyService;
-  constructor(
-    stringAfter: string,
-  ) {
-    if(ffmpegPath){
+  constructor(stringAfter: string) {
+    if (ffmpegPath) {
       ffmpeg.setFfmpegPath(ffmpegPath);
     }
     this.stringAfter = stringAfter;
@@ -41,9 +43,12 @@ export class CommandsService {
           noSubscriber: NoSubscriberBehavior.Pause,
         },
       });
-      const audioResource = createAudioResource(stream, { inputType: 'stream' });
-      player.play(audioResource);
-      bot.connection?.subscribe(player);
+      const audioResource = createAudioResource(stream, {
+        inputType: StreamType.Opus,
+      });
+      await player.play(audioResource);
+      await bot.connection?.subscribe(player);
+      console.log(bot.connection);
     } catch (error) {
       console.log(error);
       if (bot.channel && 'send' in bot.channel && !this.serverError)

@@ -10,6 +10,7 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await client.destroy();
+  await jest.autoMockOn();
 });
 describe('ClientDiscord class test', () => {
   it('Should get client', async () => {

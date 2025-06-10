@@ -2,6 +2,7 @@ import axios from 'axios';
 import { SongService } from '../interfaces/song.service';
 import { Song } from '../types/song';
 import { YTDLCoreService } from './ytdl.core.service';
+import { Readable } from 'stream';
 
 export class SpotifyService implements SongService {
   private clientID: string;
@@ -38,7 +39,7 @@ export class SpotifyService implements SongService {
       artist: track.artists[0].name,
     };
   }
-  getStream(song: Song) {
+  getStream(song: Song): Promise<Readable> {
     return this.YTDLCoreService.getStream(song);
   }
 }
