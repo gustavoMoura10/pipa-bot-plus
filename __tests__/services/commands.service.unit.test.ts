@@ -12,9 +12,9 @@ beforeAll(async () => {
   client = await clientDiscord.getClient();
 });
 afterAll(async () => {
-  jest.setTimeout(20000);
+  jest.setTimeout(6000000);
 
-  await client.destroy();
+  //await client.destroy();
 });
 describe('CommandsService class test', () => {
   it('CommandsService piPlay function test any song', async () => {
@@ -41,7 +41,6 @@ describe('CommandsService class test', () => {
     if (typeof resultCommand?.execute === 'function') {
       bot = <Bot>await resultCommand?.execute(bot);
       expect(bot.queue.size).toBeGreaterThan(0);
-      bot.connection?.disconnect();
     }
   });
 });

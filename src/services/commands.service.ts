@@ -44,11 +44,12 @@ export class CommandsService {
         },
       });
       const audioResource = createAudioResource(stream, {
-        inputType: StreamType.Opus,
+        inputType: StreamType.Arbitrary,
+        inlineVolume: true,
       });
       await player.play(audioResource);
       await bot.connection?.subscribe(player);
-      console.log(bot.connection);
+      console.log('Tocando musica');
     } catch (error) {
       console.log(error);
       if (bot.channel && 'send' in bot.channel && !this.serverError)
