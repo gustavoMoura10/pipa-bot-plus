@@ -5,23 +5,33 @@ import { YTDLCoreService } from './ytdl.core.service';
 
 export class YoutubeService implements SongService {
   constructor(private readonly YTDLCoreService: YTDLCoreService) {}
+  async searchById(id: string): Promise<Song> {
+    const result = await yts({ videoId: id });
+    return <Song>{
+      title: result.title,
+      url: result.url,
+      thumbnail: result.thumbnail,
+      artist: result.author.name,
+    };
+  }
+  async searchByQuery(query: string): Promise<Song> {
+    const result = (await yts({ search: query }))?.videos[0];
+    return <Song>{
+      title: result.title,
+      url: result.url,
+      thumbnail: result.thumbnail,
+      artist: result.author.name,
+    };
+  }
   async search(value: string): Promise<Song> {
     let id: string = '';
     if (value.includes('watch?v=')) {
       id = `${value.split('watch?v=').pop()}`;
     }
-
-    const search = (await yts({ videoId: id })) || (await yts({ search: value }));
-
-    return <Song>{
-      title: search?.title,
-      url: search?.url,
-      thumbnail: search?.thumbnail,
-      artist: search?.author.name,
-    };
+    return id ? await this.searchById(id) : await this.searchByQuery(value);
   }
 
-  getStream(song: Song) {
+  getStream(song: Song): Promise<ReadableStream<Uint8Array>> {
     return this.YTDLCoreService.getStream(song);
   }
 }

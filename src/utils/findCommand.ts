@@ -11,10 +11,13 @@ const findCommand = (string: string) => {
       stringAfter = splitString.pop() || '';
     }
   });
-  const commandsService = new CommandsService(stringAfter);
+  const commandsService = new CommandsService(stringAfter.trim());
   if (commands[functionName].execute in commandsService) {
     return {
-      execute: commandsService[commands[functionName].execute as keyof CommandsService],
+      execute:
+        commandsService[commands[functionName].execute as keyof CommandsService].bind(
+          commandsService,
+        ),
       type: commands[functionName].type,
     };
   }

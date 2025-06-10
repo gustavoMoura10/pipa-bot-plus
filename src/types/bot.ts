@@ -5,6 +5,6 @@ export type Bot = {
   queue: Map<string, unknown>;
   channel: Channel | null | undefined;
   voiceChannel: VoiceBasedChannel | null | undefined;
-  guild: Guild | null,
-  connection:VoiceConnection | null
+  guild: Guild | null | undefined,
+  connection:VoiceConnection | null | undefined
 };

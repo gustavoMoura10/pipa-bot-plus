@@ -30,11 +30,13 @@ describe('ClientDiscord class test', () => {
     expect(findChannel).toBeDefined();
   });
   it('Should error getClient', async () => {
+    const tempToken = process.env.DISCORD_TOKEN;
     process.env.DISCORD_TOKEN = 'error';
     try {
       await clientDiscord.getClient();
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
     }
+    process.env.DISCORD_TOKEN = tempToken;
   });
 });

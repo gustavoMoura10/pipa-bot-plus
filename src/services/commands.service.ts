@@ -3,19 +3,27 @@ import { Bot } from '../types/bot';
 import { v6 } from 'uuid';
 import { SpotifyService } from './spotify.service';
 import { YoutubeService } from './youtube.service';
-import { createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
+import { createAudioPlayer, createAudioResource, NoSubscriberBehavior } from '@discordjs/voice';
+import { YTDLCoreService } from './ytdl.core.service';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegPath from 'ffmpeg-static';
 
 export class CommandsService {
   private stringAfter: string;
-  private sendMessage: string;
+  private sendMessage?: string;
   private serverError: boolean = true;
-  private song: SongService;
+  private song?: SongService;
+  private yoututubeService?: YoutubeService;
+  private spotifyService?: SpotifyService;
   constructor(
     stringAfter: string,
-    private readonly yoututubeService?: YoutubeService,
-    private readonly spotifyService?: SpotifyService,
   ) {
+    if(ffmpegPath){
+      ffmpeg.setFfmpegPath(ffmpegPath);
+    }
     this.stringAfter = stringAfter;
+    this.yoututubeService = new YoutubeService(new YTDLCoreService());
+    this.spotifyService = new SpotifyService(new YTDLCoreService());
   }
 
   async piPlay(bot: Bot): Promise<Bot> {
@@ -33,15 +41,15 @@ export class CommandsService {
           noSubscriber: NoSubscriberBehavior.Pause,
         },
       });
-      player.play(stream);
-      bot.connection?.playOpusPacket(stream);
-
-      await this.songService.play(this.stringAfter, bot);
-      return bot;
+      const audioResource = createAudioResource(stream, { inputType: 'stream' });
+      player.play(audioResource);
+      bot.connection?.subscribe(player);
     } catch (error) {
       console.log(error);
-      return bot;
+      if (bot.channel && 'send' in bot.channel && !this.serverError)
+        bot.channel?.send('ERRO AO TENTAR TOCAR A MUSICA');
     }
+    return bot;
   }
   async piStop(bot: Bot): Promise<Bot> {
     return bot;
